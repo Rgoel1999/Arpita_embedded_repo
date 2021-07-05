@@ -34,7 +34,11 @@ void print_Ticket(usr_dtls*,train_dtls*);
 void print_Ticket(usr_dtls* temp_usr,train_dtls* head_train){
       
       train_dtls* temp = head_train;
-
+      if(temp_usr == NULL)
+            return;
+      if(head_train == NULL)
+            return;
+            
       while(temp!=NULL){
             if(temp_usr->train_no == temp->train_no)
                   break;
@@ -55,7 +59,8 @@ void print_Ticket(usr_dtls* temp_usr,train_dtls* head_train){
 void Reload_userdata(usr_dtls *head_usr)
 {
       usr_dtls *temp = head_usr;
-
+      if(head_usr==NULL) 
+        return;
       FILE *fp;
       fp = fopen("user_details.txt","w+");
       
@@ -87,6 +92,8 @@ void Reload_userdata(usr_dtls *head_usr)
 }
 void Reload_traindata(train_dtls *head_train)
 {
+      if(head_train == NULL)
+        return;
       train_dtls *temp = head_train;
       FILE *fp;
       fp = fopen("train_details.txt","w+");
@@ -114,7 +121,10 @@ void Reload_traindata(train_dtls *head_train)
       return;
 }
 void printTrain(train_dtls* head){
+      if(head == NULL)
+            return;
       train_dtls* temp = head;
+
       printf("Train Name\tTrain No\tSource\tDestination\tCapacity\tAvailiable\n");
       while(temp!=NULL){
             
