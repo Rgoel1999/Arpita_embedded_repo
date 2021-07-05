@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 typedef struct users_details
 {
       char username[100];
@@ -12,7 +11,6 @@ typedef struct users_details
       int status;
       struct users_details *next;
 }usr_dtls;
-
 typedef struct train_details
 {
       char name[100];
@@ -28,10 +26,109 @@ void user(usr_dtls*, train_dtls*);
 train_dtls* admin(train_dtls*);
 void book_ticket(usr_dtls*,train_dtls*);
 void cancel_ticket();
-void print_train();
 train_dtls* create_train(train_dtls*);
 void delete_train();
+void printTrain(train_dtls*);
+void print_Ticket(usr_dtls*,train_dtls*);
 
+void print_Ticket(usr_dtls* temp_usr,train_dtls* head_train){
+      
+      train_dtls* temp = head_train;
+
+      while(temp!=NULL){
+            if(temp_usr->train_no == temp->train_no)
+                  break;
+            temp = temp->next;
+      }
+      
+      printf("\t\tBerhampur Railways\n");
+      printf("-----------------------------------------------------------------------\n");
+      printf("PNR\tTrain Name\tTrain No\tSource\tDestination\tCapacity\n");
+      printf("%d\t%-15s\t%-15d\t%s\t%s\t\t%d\n",temp_usr->PNR
+                                                ,temp->name
+                                                ,temp->train_no
+                                                ,temp->start_place
+                                                ,temp->destination
+                                                ,temp_usr->no_of_seats
+                                             );
+}
+void Reload_userdata(usr_dtls *head_usr)
+{
+      usr_dtls *temp = head_usr;
+
+      FILE *fp;
+      fp = fopen("user_details.txt","w+");
+      
+      if(fp!=NULL)
+      {
+            printf(" User details File opened successfully\n");
+            while(temp!=NULL)
+            {
+                  
+                  
+				  
+                  fprintf(fp,"%s,%s,%d,%d,%d,%d\n",temp->username
+                                                      ,temp->password
+                                                      ,temp->PNR
+                                                      ,temp->train_no
+                                                      ,temp->no_of_seats
+                                                      ,temp->status
+                                                      );
+                  
+
+                  temp =temp->next;     
+            }
+             fclose(fp);
+      }
+      else
+            printf(" User details file Not saved\n");
+      
+      return;
+}
+void Reload_traindata(train_dtls *head_train)
+{
+      train_dtls *temp = head_train;
+      FILE *fp;
+      fp = fopen("train_details.txt","w+");
+      
+      if(fp!=NULL)
+      {
+            printf("Train Details File opened successfully\n");
+            while(temp!=NULL)
+            {
+                  
+                  fprintf(fp,"%s,%d,%s,%s,%d,%d\n",temp->name
+                                                ,temp->train_no
+                                                ,temp->start_place
+                                                ,temp->destination
+                                                ,temp->capacity
+                                                ,temp->booked
+                                                );
+                  temp = temp->next;
+            }
+             fclose(fp);
+      }
+      else
+            printf("Train Details file Not saved\n");
+      
+      return;
+}
+void printTrain(train_dtls* head){
+      train_dtls* temp = head;
+      printf("Train Name\tTrain No\tSource\tDestination\tCapacity\tAvailiable\n");
+      while(temp!=NULL){
+            
+            printf("%-15s\t%-15d\t%s\t%s\t\t%d\t\t%d\n",temp->name
+                                                ,temp->train_no
+                                                ,temp->start_place
+                                                ,temp->destination
+                                                ,temp->capacity
+                                                ,(temp->capacity - temp->booked)
+                                             );
+      
+            temp = temp->next;
+      }
+}
 usr_dtls* new_user_signup(usr_dtls *head_usr)
 {
       char str[100]="",pswd[100]="";usr_dtls *temp;
@@ -105,7 +202,6 @@ else
  }       
 return head_usr;
 }
-
 train_dtls* create_train(train_dtls *head_train)
 {
       char name[100]="",start_place[100]="",destination[100]="";
@@ -124,7 +220,7 @@ train_dtls* create_train(train_dtls *head_train)
       printf("Enter Train no\n");
       scanf("%d",&train_no);
 
-      printf("Enter Capacity");
+      printf("Enter Capacity\n");
       scanf("%d",&capacity);
 
 FILE *fp;
@@ -140,7 +236,7 @@ strcpy(new_node->name,name);
 strcpy(new_node->start_place,start_place);
 strcpy(new_node->destination,destination);
 new_node->train_no = train_no;
-new_node->capacity = train_no;
+new_node->capacity = capacity;
 new_node->booked =0;
 
 if(head_train==NULL)
@@ -158,16 +254,15 @@ else
  }       
 return head_train;
 }
-
 train_dtls* admin_login(train_dtls* head_train)
 {
-      char username[]="Arpita",un[100];
-      char password[]="Arp@123",pw[100];
+      char username[]="a",un[100];
+      char password[]="s",pw[100];
 
-      printf("Enter valid username\n");
+      printf("Enter Admin username\n");
       scanf("%s",un);
 
-      printf("Enter valid password\n");
+      printf("Enter Admin password\n");
       scanf("%s",pw);
 
       if(strcmp(un,username)==0 && strcmp(pw,password)==0)
@@ -179,7 +274,6 @@ train_dtls* admin_login(train_dtls* head_train)
             printf("Enter proper username or password\n");
       
 }
-
 usr_dtls* load_userdata(usr_dtls *head_usr)
 {
       usr_dtls *temp = NULL;
@@ -197,7 +291,7 @@ usr_dtls* load_userdata(usr_dtls *head_usr)
 				  strcpy(new_node->password,"");
 				  strcpy(new_node->username,"");
 				  
-                  fscanf(fp,"%[^,],%[^,],%d,%d,%d,%d",new_node->username,new_node->password,&new_node->PNR,&new_node->train_no,&new_node->no_of_seats,&new_node->status);
+                  fscanf(fp,"%[^,],%[^,],%d,%d,%d,%d\n",new_node->username,new_node->password,&new_node->PNR,&new_node->train_no,&new_node->no_of_seats,&new_node->status);
                   new_node->next = NULL;
 
                   if(head_usr==NULL)
@@ -220,7 +314,6 @@ usr_dtls* load_userdata(usr_dtls *head_usr)
       
       return head_usr;
 }
-
 train_dtls* load_traindata(train_dtls *head_train)
 {
       train_dtls *temp = NULL;
@@ -236,7 +329,7 @@ train_dtls* load_traindata(train_dtls *head_train)
                   train_dtls *new_node = NULL;
                   new_node= (train_dtls*)malloc(sizeof(train_dtls));
 				  
-                  fscanf(fp,"%[^,],%d,%[^,],%[^,],%d,%d",new_node->name,&new_node->train_no,new_node->start_place,new_node->destination,&new_node->capacity,&new_node->booked);
+                  fscanf(fp,"%[^,],%d,%[^,],%[^,],%d,%d\n",new_node->name,&new_node->train_no,new_node->start_place,new_node->destination,&new_node->capacity,&new_node->booked);
                   new_node->next = NULL;
 
                   if(head_train==NULL)
@@ -259,7 +352,6 @@ train_dtls* load_traindata(train_dtls *head_train)
       
       return head_train;
 }
-
 int user_login(usr_dtls *head_usr,train_dtls *head_train)
 {
       usr_dtls *temp = NULL; 
@@ -293,12 +385,11 @@ int user_login(usr_dtls *head_usr,train_dtls *head_train)
       }
       return 0;
 }
-
 void user(usr_dtls* temp, train_dtls* head_train)
 {
       int choice;
       printf("\t \tWelcome to Berhampur Railways\n");
-      printf("1. Book Ticket\n 2. Cancel Ticket\n 3. View Train Details\n");
+      printf("1. Book Ticket\n2. Cancel Ticket\n3. View Train Details\n4. Print My Ticket\n");
       printf("Enter choice\n");
       scanf("%d",&choice);
 
@@ -309,21 +400,22 @@ void user(usr_dtls* temp, train_dtls* head_train)
             break;
 
             case 2:
-                  cancel_ticket();
+                  // cancel_ticket();
             break;
 
             case 3:
-                  print_train();
+                  printTrain(head_train);
             break;
+            case 4:
+                  print_Ticket(temp,head_train);
       }
 
 }
-
 train_dtls* admin(train_dtls* head_train)
 {
      int ch;
       printf("\t \tWelcome to Berhampur Railways\n");
-      printf("1. create Train\n 2. delete train\n");
+      printf("1. create Train \n2. delete train \n3. View Trains\n");
       printf("Enter choice\n");
       scanf("%d",&ch);
 
@@ -334,17 +426,19 @@ train_dtls* admin(train_dtls* head_train)
             break;
 
             case 2:
-                  delete_train();
+                  // delete_train();
             break;
+            case 3:
+                  printTrain(head_train);
+
       }
       return head_train;
 }
-
 void book_ticket(usr_dtls *temp_usr,train_dtls *head_train)
 {
       train_dtls* temp = NULL;
-      int train_no =0, flag =0,no_tickets;
-      print_train(head_train);
+      int train_no =0, flag =0,no_tickets=0;
+      printTrain(head_train);
       printf("Enter train no");
       scanf("%d",&train_no);
       if(head_train == NULL)
@@ -371,12 +465,12 @@ void book_ticket(usr_dtls *temp_usr,train_dtls *head_train)
                         temp_usr->PNR = temp->train_no +3000;
                         temp_usr->train_no = temp->train_no;
                         temp_usr->no_of_seats = no_tickets;
+                        temp->booked = no_tickets;
                         temp_usr->status =1;
                   }
                   else
                   {
                         printf("Sorry!! Your ticket is not booked.\n");
-                        temp_usr->status =0;
                   }
 
             }
@@ -386,17 +480,17 @@ void book_ticket(usr_dtls *temp_usr,train_dtls *head_train)
                   return;
             }
 }
-
-
 int main ()
 {
       usr_dtls *head_usr = NULL;
-      train_dtls *head_train = NULL; int k;
+      train_dtls *head_train = NULL; 
+      int k;
       head_usr = load_userdata(head_usr);
       head_train = load_traindata(head_train);
       
       int ch;
-      printf("\nEnter Choice");
+      printf("\nEnter Choice\n");
+      printf("1 New User Signup\n2 Admin Login\n3 User Login\n");
       scanf("%d",&ch);
       switch(ch)
       {
@@ -405,7 +499,7 @@ int main ()
             break;
 
             case 2:
-                  admin_login(head_train);
+                  head_train = admin_login(head_train);
             break;
 
             case 3:
@@ -418,4 +512,21 @@ int main ()
             }
             break;
       }
+
+      Reload_traindata(head_train);
+      Reload_userdata(head_usr);
+     
+      while(head_usr!=NULL){
+            usr_dtls* temp = head_usr;
+            head_usr=head_usr->next;
+            free(temp);
+      }
+
+      while(head_train!=NULL){
+            train_dtls* temp = head_train;
+            head_train=head_train->next;
+            free(temp);
+      }
+
+
 }
