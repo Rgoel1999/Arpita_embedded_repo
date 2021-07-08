@@ -1,2 +1,3 @@
 bam-bbsr,1234,bam,bbsr,50,3
 bam-blore,1235,bam,blore,40,2
+bam-mys,4567,bam,mys,50,4

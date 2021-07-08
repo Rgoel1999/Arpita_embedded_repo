@@ -25,9 +25,8 @@ typedef struct train_details
 void user(usr_dtls*, train_dtls*);
 train_dtls* admin(train_dtls*);
 void book_ticket(usr_dtls*,train_dtls*);
-void cancel_ticket();
+void cancel_ticket(usr_dtls*,train_dtls*);
 train_dtls* create_train(train_dtls*);
-void delete_train();
 void printTrain(train_dtls*);
 void print_Ticket(usr_dtls*,train_dtls*);
 
@@ -38,7 +37,11 @@ void print_Ticket(usr_dtls* temp_usr,train_dtls* head_train){
             return;
       if(head_train == NULL)
             return;
-            
+      if(temp_usr->status == 0)
+      {     
+            printf("no tickets found");
+            return;
+      }  
       while(temp!=NULL){
             if(temp_usr->train_no == temp->train_no)
                   break;
@@ -282,7 +285,7 @@ train_dtls* admin_login(train_dtls* head_train)
             }
       else
             printf("Enter proper username or password\n");
-      
+      return head_train;
 }
 usr_dtls* load_userdata(usr_dtls *head_usr)
 {
@@ -364,7 +367,7 @@ train_dtls* load_traindata(train_dtls *head_train)
 }
 int user_login(usr_dtls *head_usr,train_dtls *head_train)
 {
-      usr_dtls *temp = NULL; 
+      usr_dtls *temp_usr = NULL; 
       char usr_name[100]="",pwd[100]="";
       printf("Enter valid username\n");
       scanf("%s",usr_name);
@@ -380,22 +383,22 @@ int user_login(usr_dtls *head_usr,train_dtls *head_train)
       if(head_usr==NULL)
             return 0;
       
-      temp = head_usr;
-    while(temp!=NULL)
+      temp_usr = head_usr;
+    while(temp_usr!=NULL)
       {
             
-            if(strcmp(temp->username,usr_name)==0 && strcmp(temp->password,pwd)==0)
+            if(strcmp(temp_usr->username,usr_name)==0 && strcmp(temp_usr->password,pwd)==0)
                   {
                         printf("Logged In Successfully\n");
-                        user(temp,head_train);
+                        user(temp_usr,head_train);
                         return 1;
                   }
            
-            temp = temp->next;
+            temp_usr = temp_usr->next;
       }
       return 0;
 }
-void user(usr_dtls* temp, train_dtls* head_train)
+void user(usr_dtls* temp_usr, train_dtls* head_train)
 {
       int choice;
       printf("\t \tWelcome to Berhampur Railways\n");
@@ -406,18 +409,18 @@ void user(usr_dtls* temp, train_dtls* head_train)
       switch(choice)
       {
             case 1:
-                  book_ticket(temp,head_train);
+                  book_ticket(temp_usr,head_train);
             break;
 
             case 2:
-                  // cancel_ticket();
+                  cancel_ticket(temp_usr,head_train);
             break;
 
             case 3:
                   printTrain(head_train);
             break;
             case 4:
-                  print_Ticket(temp,head_train);
+                  print_Ticket(temp_usr,head_train);
       }
 
 }
@@ -425,7 +428,7 @@ train_dtls* admin(train_dtls* head_train)
 {
      int ch;
       printf("\t \tWelcome to Berhampur Railways\n");
-      printf("1. create Train \n2. delete train \n3. View Trains\n");
+      printf("1. create Train \n2. View Trains\n");
       printf("Enter choice\n");
       scanf("%d",&ch);
 
@@ -436,9 +439,6 @@ train_dtls* admin(train_dtls* head_train)
             break;
 
             case 2:
-                  // delete_train();
-            break;
-            case 3:
                   printTrain(head_train);
 
       }
@@ -446,7 +446,7 @@ train_dtls* admin(train_dtls* head_train)
 }
 void book_ticket(usr_dtls *temp_usr,train_dtls *head_train)
 {
-      train_dtls* temp = NULL;
+      train_dtls* temp_train = NULL;
       int train_no =0, flag =0,no_tickets=0;
       printTrain(head_train);
       printf("Enter train no");
@@ -454,28 +454,28 @@ void book_ticket(usr_dtls *temp_usr,train_dtls *head_train)
       if(head_train == NULL)
             return;
       
-            temp = head_train;
-            while(temp!=NULL)
+            temp_train = head_train;
+            while(temp_train!=NULL)
             {
-                  if(temp->train_no == train_no)
+                  if(temp_train->train_no == train_no)
                         {
                               flag =1;
                               break;
                         }
-                  temp = temp->next;
+                  temp_train = temp_train->next;
             }
             if(flag)
             {
-                  printf("no of seats available = %d\n",temp->capacity - temp->booked);
+                  printf("no of seats available = %d\n",temp_train->capacity - temp_train->booked);
                   printf("no of tickets to be booked\n");
                   scanf("%d",&no_tickets);
-                  if(no_tickets<=(temp->capacity - temp->booked))
+                  if(no_tickets<=(temp_train->capacity - temp_train->booked))
                   {
                         printf("Congratulations!! Your ticket is booked.\n");
-                        temp_usr->PNR = temp->train_no +3000;
-                        temp_usr->train_no = temp->train_no;
+                        temp_usr->PNR = temp_train->train_no +3000;
+                        temp_usr->train_no = temp_train->train_no;
                         temp_usr->no_of_seats = no_tickets;
-                        temp->booked = no_tickets;
+                        temp_train->booked = temp_train->booked+ no_tickets;
                         temp_usr->status =1;
                   }
                   else
@@ -488,6 +488,47 @@ void book_ticket(usr_dtls *temp_usr,train_dtls *head_train)
             {
                   printf("Wrong train no.\n");
                   return;
+            }
+}
+void cancel_ticket(usr_dtls *temp_usr,train_dtls *head_train)
+{
+      train_dtls* temp_train = NULL;
+      int flag =0,can_tickets=0;
+      print_Ticket(temp_usr,head_train);
+      printf("Enter no. of tickets to be cancelled");
+      scanf("%d",&can_tickets);
+      if(head_train == NULL)
+            return;
+      
+            temp_train = head_train;
+            while(temp_train!=NULL)
+            {
+                  if(temp_train->train_no == temp_usr->train_no)
+                        {
+                              flag =1;
+                              break;
+                        }
+                  temp_train = temp_train->next;
+            }
+            if(flag)
+            {
+                  if(can_tickets >0 && can_tickets<=(temp_usr->no_of_seats))
+                  {
+                        printf("Your ticket is cancelled.\n");
+                        temp_usr->no_of_seats = temp_usr->no_of_seats - can_tickets;
+                        temp_train->booked = temp_train->booked - can_tickets;
+                        if(temp_usr->no_of_seats == 0)
+                        {
+                              temp_usr->PNR = 0;
+                              temp_usr->train_no = 0;
+                              temp_usr->status =0;
+                        }
+                  }
+                  else
+                  {
+                        printf("Sorry!! Your ticket is not cancelled.\n");
+                  }
+
             }
 }
 int main ()
@@ -537,6 +578,4 @@ int main ()
             head_train=head_train->next;
             free(temp);
       }
-
-
 }
